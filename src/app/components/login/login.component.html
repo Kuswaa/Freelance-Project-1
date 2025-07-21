@@ -1,0 +1,45 @@
+<!-- login.component.html -->
+<div class="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-purple-600 to-purple-900 text-white">
+    <!-- Left side image container -->
+    <div class="w-full md:w-1/2 flex items-center justify-center p-10">
+        <div class="max-w-md w-full">
+        <!-- Placeholder for Dominican Flag image -->
+        <div class="w-full h-80 bg-white rounded-xl flex items-center justify-center">
+            <img src="assets/images/dominican-flag.jpg" alt="Dominican Flag" class="h-full object-contain rounded-xl shadow-lg" />
+        </div>
+        <p class="mt-6 text-center text-sm text-white/80">
+            Login your Account to get full User Experience<br>
+            <span class="text-xs">Tip: Upgrade your Account to get access Premium Features</span>
+        </p>
+        </div>
+    </div>
+
+    <!-- Right side form container -->
+    <div class="w-full md:w-1/2 bg-white text-gray-900 rounded-t-3xl md:rounded-none p-10 flex flex-col justify-center">
+        <div class="max-w-sm mx-auto w-full">
+        <h2 class="text-2xl font-bold mb-1">Hello!</h2>
+        <p class="text-sm text-gray-500 mb-6">Good Morning</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+            <label class="text-sm font-medium">Username</label>
+            <input type="email" formControlName="email" class="w-full mt-1 mb-4 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+
+            <label class="text-sm font-medium">Password</label>
+            <input type="password" formControlName="password" class="w-full mt-1 mb-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+
+            <div class="flex justify-end text-sm text-purple-600 mb-4">
+            <a routerLink="/forgot-password">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-all duration-300">
+            Login
+            </button>
+
+            <div class="text-sm text-center mt-4">
+            Don't have an account?
+            <a routerLink="/signup" class="text-purple-600 font-medium">Create Account</a>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
