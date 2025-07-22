@@ -1,41 +1,52 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
-import { Auth } from '@angular/fire/auth'; // ✅ DI token
-import { createUserWithEmailAndPassword } from 'firebase/auth'; // ✅ Firebase function
+import { Auth } from '@angular/fire/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterModule, CommonModule],
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css']
 })
 export class SignupComponent {
+
+  showPassword = false;
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
   signupForm: FormGroup;
 
   private fb = inject(FormBuilder);
-  private auth = inject(Auth); // ✅ works now
+  private auth = inject(Auth);
+  private router = inject(Router);
 
   constructor() {
     this.signupForm = this.fb.group({
-      username: ['', [Validators.required]],
+      username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
-  onSignup(): void {
-    const username: string = this.signupForm.value.username;
-    const password: string = this.signupForm.value.password;
-    const fakeEmail: string = `${username}@dummy.com`;
+  async onSignup() {
+    if (this.signupForm.invalid) return;
 
-    createUserWithEmailAndPassword(this.auth, fakeEmail, password)
-      .then((res) => {
-        console.log('✅ User created:', res.user);
-      })
-      .catch((err) => {
-        console.error('❌ Signup error:', err.message || err);
-      });
+    const username = this.signupForm.value.username.trim();
+    const password = this.signupForm.value.password;
+    const fakeEmail = `${username}@dummy.com`;
+
+    try {
+      const res = await createUserWithEmailAndPassword(this.auth, fakeEmail, password);
+      console.log('✅ User created:', res.user);
+      this.router.navigate(['/home']);
+    } catch (err: any) {
+      console.error('❌ Signup error:', err.message || err);
+    }
   }
 }
