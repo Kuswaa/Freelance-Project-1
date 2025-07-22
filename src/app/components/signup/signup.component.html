@@ -1,30 +1,36 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <form [formGroup]="signupForm" (ngSubmit)="onSignup()" class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
-        <h2 class="text-2xl font-semibold text-center mb-4">Sign Up</h2>
+<div class="min-h-screen flex items-center justify-center bg-[#0c1e35] text-white">
+    <div class="flex bg-[#102a44] flex-row w-full max-w-5xl m-4 md:m-10 shadow-2xl rounded-2xl overflow-hidden">
+        <div class="flex sm:hidden w-2/4 items-center justify-center p-6 lg:pl-16 lg:pr-0">
+            <img src="assets/dominican-republic-flag.jpg"
+                alt="Dominican Republic Flag"
+                class="w-full object-contain drop-shadow-2xl">
+        </div>
 
-        <input
-        formControlName="email"
-        type="email"
-        placeholder="Email"
-        class="w-full mb-3 p-2 border rounded"
-        >
+        <div class="w-full lg:w-2/4 md:w-2/4 sm:w-full flex items-center justify-center p-8">
+            <div class="w-full max-w-sm">
+                <h2 class="text-3xl font-bold mb-2">Create Account</h2>
+                <p class="text-sm text-gray-300 mb-6">Start your journey</p>
 
-        <input
-        formControlName="password"
-        type="password"
-        placeholder="Password"
-        class="w-full mb-3 p-2 border rounded"
-        >
+                <form [formGroup]="signupForm" (ngSubmit)="onSignup()">
+                    <label class="text-sm font-medium">Username</label>
+                    <input type="text" formControlName="username"
+                        class="w-full mt-1 mb-4 p-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
 
-        <input
-        formControlName="confirmPassword"
-        type="password"
-        placeholder="Confirm Password"
-        class="w-full mb-3 p-2 border rounded"
-        >
+                    <label class="text-sm font-medium">Password</label>
+                    <input type="password" formControlName="password"
+                        class="w-full mt-1 mb-4 p-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
 
-        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-        Sign Up
-        </button>
-    </form>
+                    <button type="submit"
+                        class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-all duration-300">
+                        Sign Up
+                    </button>
+
+                    <div class="text-sm text-center mt-4">
+                        Already have an account?
+                        <a routerLink="/login" class="text-blue-300 font-medium hover:underline">Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

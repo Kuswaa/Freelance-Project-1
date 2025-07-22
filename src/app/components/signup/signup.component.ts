@@ -1,36 +1,41 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+
+import { Auth } from '@angular/fire/auth'; // ✅ DI token
+import { createUserWithEmailAndPassword } from 'firebase/auth'; // ✅ Firebase function
 
 @Component({
   selector: 'app-signup',
-  imports: [ReactiveFormsModule],
+  standalone: true,
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './signup.component.html',
-  styleUrl: './signup.component.css'
+  styleUrls: ['./signup.component.css']
 })
-
-export class SignupComponent
-{
+export class SignupComponent {
   signupForm: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  private fb = inject(FormBuilder);
+  private auth = inject(Auth); // ✅ works now
+
+  constructor() {
     this.signupForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required],
     });
   }
 
-  onSignup() {
-    if (this.signupForm.valid) {
-      const { email, password, confirmPassword } = this.signupForm.value;
+  onSignup(): void {
+    const username: string = this.signupForm.value.username;
+    const password: string = this.signupForm.value.password;
+    const fakeEmail: string = `${username}@dummy.com`;
 
-      if (password !== confirmPassword) {
-        alert('Passwords do not match!');
-        return;
-      }
-
-      console.log('Signing up with:', email, password);
-      // TODO: Firebase or backend API call
-    }
+    createUserWithEmailAndPassword(this.auth, fakeEmail, password)
+      .then((res) => {
+        console.log('✅ User created:', res.user);
+      })
+      .catch((err) => {
+        console.error('❌ Signup error:', err.message || err);
+      });
   }
 }
