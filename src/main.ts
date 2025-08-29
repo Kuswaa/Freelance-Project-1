@@ -6,6 +6,8 @@ import { provideAuth, getAuth } from '@angular/fire/auth';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideStorage, getStorage } from '@angular/fire/storage';
 
+import { provideHttpClient } from '@angular/common/http'; // ⬅️ Import this
+
 import { firebaseConfig } from './environments/firebase.config';
 import { appConfig } from './app/app.config';
 
@@ -15,6 +17,7 @@ bootstrapApplication(AppComponent, {
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
-    provideStorage(() => getStorage())
+    provideStorage(() => getStorage()),
+    provideHttpClient() // ⬅️ Register HttpClient provider
   ]
 }).catch(err => console.error(err));
