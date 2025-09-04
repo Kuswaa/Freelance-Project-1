@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { SearchService } from '../../services/search.service';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { SearchService } from '../../services/search.service';
+import { SearchResponse } from '../../services/search.types';
+
 
 @Component({
     selector: 'app-home',
@@ -66,11 +68,17 @@ onSearch() {
 
     console.log("Searching with:", { type: queryType, value: queryValue });
 
-this.searchService.search({ type: queryType, value: queryValue }).subscribe(res => {
-        console.log("Backend results:", res.results);
-        this.searchService.setResults(res.results); // store results
-        this.router.navigate(['/results']); // navigate to results page
+    this.searchService.search(queryType, queryValue).subscribe({
+    next: (response: SearchResponse) => {
+        console.log("✅ SearchResponse received:", response);
+
+        // Now you can safely extract results
+        this.searchService.setResults(response.results);
+    },
+    error: (err) => console.error("❌ Search error:", err)
     });
+
+
 }
 
 }

@@ -1,0 +1,9 @@
+<div *ngIf="person; else notFound">
+    <h2>{{ person.name }}</h2>
+    <p><strong>Cédula:</strong> {{ person.cedula }}</p>
+    <p><a [href]="person.link" target="_blank">View on External Site</a></p>
+    </div>
+
+    <ng-template #notFound>
+    <p>No details found for this person.</p>
+</ng-template>

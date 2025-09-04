@@ -1,14 +1,2 @@
-from flask import Flask
-from flask_cors import CORS
-
-def create_app():
-    app = Flask(__name__)
-
-    # Allow only Angular frontend
-    CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}})
-
-    # Import and register routes
-    from .routes import routes
-    app.register_blueprint(routes)
-
-    return app
+# app/__init__.py
+# Only makes the folder a Python package

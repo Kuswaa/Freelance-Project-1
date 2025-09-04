@@ -4,10 +4,6 @@ from .scraper import run_scraper
 
 routes = Blueprint("routes", __name__)
 
-@routes.route("/", methods=["GET"])
-def home():
-    return jsonify({"message": "Backend is running!"})
-
 @routes.route("/scrape", methods=["POST"])
 def scrape():
     data = request.json
