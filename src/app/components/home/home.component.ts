@@ -37,7 +37,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // ✅ Subscribe to service observables
+    console.log('🟢 HomeComponent initialized');
+
+    // Subscribe to service observables
     this.subscription.add(
       this.searchService.results$.subscribe(r => {
         console.log('📦 Results updated in HomeComponent:', r);
@@ -54,6 +56,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    console.log('🛑 HomeComponent destroyed, unsubscribing');
     this.subscription.unsubscribe();
   }
 
@@ -65,6 +68,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     let queryType = '';
     let queryValue = '';
+
     if (firstName) { queryType = 'name'; queryValue = firstName; }
     else if (lastName) { queryType = 'name'; queryValue = lastName; }
     else if (idCardNumber) { queryType = 'id'; queryValue = idCardNumber; }
@@ -78,10 +82,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     console.log('📝 Resolved queryType:', queryType, '| queryValue:', queryValue);
 
-    // ✅ Just call the service — no subscribe needed
+    // Call the service
     this.searchService.search(queryType, queryValue);
 
-    // Navigate to results
+    // Navigate to results page
     this.router.navigate(['/home/results']);
   }
 }

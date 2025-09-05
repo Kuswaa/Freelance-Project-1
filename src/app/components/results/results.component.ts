@@ -1,4 +1,3 @@
-// src/app/components/results/results.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -9,7 +8,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-results',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './results.component.html',
   styleUrls: ['./results.component.css']
 })
@@ -26,20 +25,19 @@ export class ResultsComponent implements OnInit, OnDestroy {
   constructor(private searchService: SearchService, private router: Router) {}
 
   ngOnInit(): void {
-    // ✅ Subscribe to both results and loading
+    console.log('🟢 ResultsComponent initialized');
+
     this.subscription.add(
       this.searchService.results$.subscribe(results => {
         console.log('📦 Normalized results in ResultsComponent:', results);
         this.results = results;
         this.totalPages = Math.ceil(this.results.length / this.pageSize);
 
-        // Optional: if empty, redirect back
         if (!this.loading && this.results.length === 0) {
-          console.warn('⚠️ No results found, redirecting to /home');
-          // this.router.navigate(['/home']);
+          console.warn('⚠️ No results found');
         }
-      }
-    ));
+      })
+    );
 
     this.subscription.add(
       this.searchService.loading$.subscribe(l => {
@@ -50,6 +48,7 @@ export class ResultsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    console.log('🛑 ResultsComponent destroyed, unsubscribing');
     this.subscription.unsubscribe();
   }
 
@@ -61,13 +60,26 @@ export class ResultsComponent implements OnInit, OnDestroy {
 
   nextPage() {
     if (this.currentPage + 1 < this.totalPages) {
+      console.log('➡️ Next page');
       this.currentPage++;
     }
   }
 
   prevPage() {
     if (this.currentPage > 0) {
+      console.log('⬅️ Previous page');
       this.currentPage--;
     }
   }
+
+  viewDetails(person: Person) {
+    console.log('🔗 Navigating to details for cedula:', person.cedula);
+    this.router.navigate(['/home/details', person.cedula]);
+  }
+
+  logPerson(person: Person) {
+  console.log('Navigating to details for', person.cedula);
+}
+
+
 }

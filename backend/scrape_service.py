@@ -71,7 +71,10 @@ def scrape_data(query_type, query_value):
                 href = links[0].get_attribute("href") if len(links) > 0 else ""
 
                 # Build absolute link
-                link = f"https://api.contek.com.do/web/{href}" if href else ""
+                if href.startswith("http"):
+                    link = href
+                else:
+                    link = f"https://api.contek.com.do/web/{href}" if href else ""
 
                 results.append({
                     "name": name,

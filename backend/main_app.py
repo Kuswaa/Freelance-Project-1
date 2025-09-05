@@ -2,6 +2,7 @@ import os
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from scraper_controller import scraper_bp
+from scrape_details import details_bp
 
 # --- Paths ---
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -21,11 +22,14 @@ def create_app():
     # Allow frontend to call API endpoints
     CORS(app, resources={
         r"/scrape/*": {"origins": "*"},
-        r"/search*": {"origins": "*"}
+        r"/search*": {"origins": "*"},
+        r"/details*": {"origins": "*"}  # <-- allow /details endpoint
+
     })
 
     # Register your API blueprint
     app.register_blueprint(scraper_bp)
+    app.register_blueprint(details_bp)
 
     # --- Catch-all route for Angular SPA ---
     @app.route("/", defaults={"path": ""})
