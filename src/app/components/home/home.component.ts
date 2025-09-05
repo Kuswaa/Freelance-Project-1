@@ -1,84 +1,87 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SearchService } from '../../services/search.service';
-import { SearchResponse } from '../../services/search.types';
-
+import { Subscription } from 'rxjs';
 
 @Component({
-    selector: 'app-home',
-    imports: [ ReactiveFormsModule, CommonModule],
-    templateUrl: './home.component.html',
-    })
+  selector: 'app-home',
+  imports: [ReactiveFormsModule, CommonModule],
+  templateUrl: './home.component.html',
+})
+export class HomeComponent implements OnInit, OnDestroy {
+  searchForm: FormGroup;
+  results: any[] = [];
+  loading = false;
 
-export class HomeComponent {
-    searchForm: FormGroup;
-    results: any[] = []; // will hold backend results
+  private subscription = new Subscription();
 
-    constructor(
-        private fb: FormBuilder,
-        private searchService: SearchService,
-        private router: Router
-        
-    ) {
-        this.searchForm = this.fb.group({
-        firstName: [''],
-        lastName: [''],
-        middleName: [''],
-        licensePlate: [''],
-        phone: [''],
-        idCardName: [''],
-        idCardNumber: [''],
-        idCardType: [''],
-        chassisNumber: [''],
-        companyName: ['']
-        });
-    }
+  constructor(
+    private fb: FormBuilder,
+    private searchService: SearchService,
+    private router: Router
+  ) {
+    this.searchForm = this.fb.group({
+      firstName: [''],
+      lastName: [''],
+      middleName: [''],
+      licensePlate: [''],
+      phone: [''],
+      idCardName: [''],
+      idCardNumber: [''],
+      idCardType: [''],
+      chassisNumber: [''],
+      companyName: ['']
+    });
+  }
 
-onSearch() {
-    const formData = this.searchForm.value;
+  ngOnInit() {
+    // ✅ Subscribe to service observables
+    this.subscription.add(
+      this.searchService.results$.subscribe(r => {
+        console.log('📦 Results updated in HomeComponent:', r);
+        this.results = r;
+      })
+    );
+
+    this.subscription.add(
+      this.searchService.loading$.subscribe(l => {
+        console.log('⏳ Loading updated in HomeComponent:', l);
+        this.loading = l;
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  onSearch() {
+    console.log('🔍 onSearch() triggered');
+    console.log('Form values:', this.searchForm.value);
+
+    const { firstName, lastName, idCardNumber, phone, licensePlate } = this.searchForm.value;
+
     let queryType = '';
     let queryValue = '';
-
-    if (formData.firstName) {
-        queryType = 'name';
-        queryValue = formData.firstName;
-    } else if (formData.lastName) {
-        queryType = 'name';
-        queryValue = formData.lastName;
-    } else if (formData.middleName) {
-        queryType = 'name';
-        queryValue = formData.middleName;
-    } else if (formData.idCardNumber) {
-        queryType = 'id';
-        queryValue = formData.idCardNumber;
-    } else if (formData.phone) {
-        queryType = 'phone';
-        queryValue = formData.phone;
-    } else if (formData.licensePlate) {
-        queryType = 'plate';
-        queryValue = formData.licensePlate;
-    }
+    if (firstName) { queryType = 'name'; queryValue = firstName; }
+    else if (lastName) { queryType = 'name'; queryValue = lastName; }
+    else if (idCardNumber) { queryType = 'id'; queryValue = idCardNumber; }
+    else if (phone) { queryType = 'phone'; queryValue = phone; }
+    else if (licensePlate) { queryType = 'plate'; queryValue = licensePlate; }
 
     if (!queryType || !queryValue) {
-        console.warn('No query value entered');
-        return;
+      console.warn('⚠️ No query value entered');
+      return;
     }
 
-    console.log("Searching with:", { type: queryType, value: queryValue });
+    console.log('📝 Resolved queryType:', queryType, '| queryValue:', queryValue);
 
-    this.searchService.search(queryType, queryValue).subscribe({
-    next: (response: SearchResponse) => {
-        console.log("✅ SearchResponse received:", response);
+    // ✅ Just call the service — no subscribe needed
+    this.searchService.search(queryType, queryValue);
 
-        // Now you can safely extract results
-        this.searchService.setResults(response.results);
-    },
-    error: (err) => console.error("❌ Search error:", err)
-    });
-
-
-}
-
+    // Navigate to results
+    this.router.navigate(['/home/results']);
+  }
 }

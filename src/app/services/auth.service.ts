@@ -1,40 +1,45 @@
+// src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
-import { Auth, authState, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
-import { User } from 'firebase/auth';
-import { Observable } from 'rxjs';
-import { Router } from '@angular/router';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  user$: Observable<User | null>;
+  private _isLoggedIn$ = new BehaviorSubject<boolean>(this.hasToken());
 
-  constructor(private auth: Auth, private router: Router) {
-    this.user$ = authState(this.auth);
+  get isLoggedIn$(): Observable<boolean> {
+    return this._isLoggedIn$.asObservable();
   }
 
-  login(email: string, password: string) {
-    return signInWithEmailAndPassword(this.auth, email, password);
+  constructor() {}
+
+  private hasToken(): boolean {
+    return !!sessionStorage.getItem('token');
   }
 
-logout() {
-  signOut(this.auth)
-    .then(() => {
-      console.log('✅ Firebase signOut successful');
-      this.router.navigate(['/login']).then(success => {
-        if (success) {
-          console.log('✅ Navigated to /login');
-        } else {
-          console.error('❌ Navigation to /login failed');
-        }
-      });
-    })
-    .catch((error) => {
-      console.error('❌ Logout error:', error);
-    });
-}
+  // ✅ Now accepts username + password and returns Observable
+  login(username: string, password: string): Observable<boolean> {
+    if (username && password) {
+      const fakeToken = `${username}-session-token`;
+      sessionStorage.setItem('token', fakeToken);
+      this._isLoggedIn$.next(true);
+      return of(true);
+    } else {
+      return throwError(() => new Error('Invalid credentials'));
+    }
+  }
 
+  logout(): void {
+    sessionStorage.removeItem('token');
+    this._isLoggedIn$.next(false);
+  }
 
-  getCurrentUser(): User | null {
-    return this.auth.currentUser;
+  isAuthenticated(): boolean {
+    return this.hasToken();
+  }
+
+  getToken(): string | null {
+    return sessionStorage.getItem('token');
   }
 }

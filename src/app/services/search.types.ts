@@ -1,10 +1,11 @@
 // src/app/services/search.types.ts
 export interface Person {
-    cedula?: string;
     name?: string;
+    cedula?: string;
+    link?: string;
+    image: string;   
     phone?: string;
     plate?: string;
-    link?: string;
 }
 
 export interface SearchResponse {

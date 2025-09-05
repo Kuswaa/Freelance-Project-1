@@ -3,22 +3,10 @@
 
     <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="text" placeholder="First name" formControlName="firstName" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-        <input type="text" placeholder="Middle name" formControlName="middleName" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
         <input type="text" placeholder="Last name" formControlName="lastName" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
         <input type="text" placeholder="ID card number" formControlName="idCardNumber" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
         <input type="text" placeholder="Vehicle license plate" formControlName="licensePlate" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
         <input type="text" placeholder="Phone number" formControlName="phone" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-        <input type="text" placeholder="ID card name" formControlName="idCardName" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-
-        <!-- <select formControlName="idCardType" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-        <option>ID card type</option>
-        </select>
-        <select formControlName="chassisNumber" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-        <option>Engine chassis number</option>
-        </select>
-        <select formControlName="companyName" class="bg-[#334155] text-white rounded-md px-4 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-        <option>Company name</option>
-        </select> -->
 
         <div class="flex items-end justify-end mt-6">
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-2 rounded-md text-md font-semibold">Search</button>

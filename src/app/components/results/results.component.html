@@ -1,22 +1,38 @@
-<!-- src/app/components/results/results.component.html -->
-<div class="results-container">
-    <h2>Search Results</h2>
+<!-- results.component.html -->
+<div class="bg-[#1E293B] rounded-lg p-6">
+  <h2 class="text-xl font-bold mb-4 text-white">Search Results</h2>
 
-    <div *ngIf="results.length === 0">
-        <p>No results found.</p>
-    </div>
+  <!-- html-validate-disable-next no-raw-characters -->
+  @if (results.length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (person of results; track person.cedula) {
+        <div
+          class="bg-[#334155] rounded-lg p-4 flex items-center shadow-md hover:shadow-lg transition"
+        >
+          <!-- Profile Image -->
+          <img
+            [src]="person.image || 'assets/default-avatar.png'"
+            alt="Profile Image"
+            class="w-20 h-20 object-cover border border-gray-600 mr-4">
 
-    <div *ngIf="results.length > 0">
-        <div *ngFor="let r of paginatedResults()" class="result-card">
-        <p><strong>Name:</strong> {{ r.name }}</p>
-        <p><strong>Cédula:</strong> {{ r.cedula }}</p>
-        <a [routerLink]="['/details', r.cedula]">View Details</a>
+          <!-- Details -->
+          <div class="flex flex-col">
+            <a
+              [href]="person.link"
+              [attr.target]="'_blank'"
+              [attr.rel]="'noopener noreferrer'"
+              class="text-white font-semibold hover:text-violet-400 transition">
+              {{ person.name }}
+            </a>
+
+            <p class="text-gray-300 text-sm">
+              <span class="font-medium">Cédula:</span> {{ person.cedula }}
+            </p>
+          </div>
         </div>
-
-        <div class="pagination">
-        <button (click)="prevPage()" [disabled]="currentPage === 0">Previous</button>
-        <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
-        <button (click)="nextPage()" [disabled]="currentPage + 1 >= totalPages">Next</button>
-        </div>
+      }
     </div>
+  } @else {
+    <p class="text-center text-gray-400 mt-6">⚠️ No results found.</p>
+  }
 </div>

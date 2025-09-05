@@ -22,10 +22,6 @@ def scrape_data(query_type, query_value):
         # 1. Go to login page
         driver.get("https://api.contek.com.do/web/index.php")
 
-        with open("login_page.html", "w", encoding="utf-8") as f:
-            f.write(driver.page_source)
-        print("✅ Saved login_page.html for inspection")
-
         # 2. Login
         driver.find_element(By.NAME, "user").send_keys("nellk")
         driver.find_element(By.NAME, "pass").send_keys("p0cho")
@@ -35,7 +31,6 @@ def scrape_data(query_type, query_value):
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.LINK_TEXT, "BÚSQUEDA SIMPLE"))
         )
-        print("✅ Login successful")
 
         # Click "BÚSQUEDA SIMPLE"
         driver.find_element(By.LINK_TEXT, "BÚSQUEDA SIMPLE").click()
@@ -62,16 +57,29 @@ def scrape_data(query_type, query_value):
 
         for item in items:
             try:
+                # Extract image from inline style
+                preimage_div = item.find_element(By.CSS_SELECTOR, "div.preimage")
+                style = preimage_div.get_attribute("style") if preimage_div else ""
+                image = None
+                if "url(" in style:
+                    image = style.split("url(")[1].split(")")[0].strip("'\"")
+
+                # Extract name + cedula
                 links = item.find_elements(By.TAG_NAME, "a")
                 name = links[0].text.strip() if len(links) > 0 else ""
                 cedula = links[1].text.strip() if len(links) > 1 else ""
-                link = links[0].get_attribute("href") if len(links) > 0 else ""
+                href = links[0].get_attribute("href") if len(links) > 0 else ""
+
+                # Build absolute link
+                link = f"https://api.contek.com.do/web/{href}" if href else ""
 
                 results.append({
                     "name": name,
                     "cedula": cedula,
-                    "link": link
+                    "link": link,
+                    "image": image
                 })
+
             except Exception as e:
                 print(f"⚠️ Skipping item due to error: {e}")
                 continue
@@ -79,7 +87,7 @@ def scrape_data(query_type, query_value):
         return {
             "query_type": query_type,
             "query_value": query_value,
-            "results": results  
+            "results": results
         }
 
     finally:
