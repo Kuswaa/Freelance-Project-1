@@ -3,7 +3,7 @@ export interface Person {
     name?: string;
     cedula?: string;
     link?: string;
-    image: string;   
+    image?: string;   
     phone?: string;
     plate?: string;
 }

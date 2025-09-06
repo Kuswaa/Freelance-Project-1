@@ -12,7 +12,7 @@
       [routerLink]="['/home/details', person.cedula]" (click)="logPerson(person)">
 
       <!-- Profile Image -->
-      <img [src]="person.image || 'assets/default-avatar.png'" alt="Profile Image"
+          <img [src]="person.image || 'assets/no_user.png'"
             class="w-20 h-20 object-cover border border-gray-600 mr-4 rounded-full">
 
       <!-- Details -->

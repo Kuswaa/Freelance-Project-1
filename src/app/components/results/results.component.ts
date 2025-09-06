@@ -24,16 +24,16 @@ export class ResultsComponent implements OnInit, OnDestroy {
 
   constructor(private searchService: SearchService, private router: Router) {}
 
-  ngOnInit(): void {
-    console.log('🟢 ResultsComponent initialized');
+  private hasSearched = false;
 
+  ngOnInit(): void {
     this.subscription.add(
       this.searchService.results$.subscribe(results => {
         console.log('📦 Normalized results in ResultsComponent:', results);
         this.results = results;
         this.totalPages = Math.ceil(this.results.length / this.pageSize);
 
-        if (!this.loading && this.results.length === 0) {
+        if (this.hasSearched && !this.loading && results.length === 0) {
           console.warn('⚠️ No results found');
         }
       })
@@ -43,9 +43,11 @@ export class ResultsComponent implements OnInit, OnDestroy {
       this.searchService.loading$.subscribe(l => {
         console.log('⏳ Loading updated in ResultsComponent:', l);
         this.loading = l;
+        if (!l) this.hasSearched = true; // mark search complete
       })
     );
   }
+
 
   ngOnDestroy(): void {
     console.log('🛑 ResultsComponent destroyed, unsubscribing');

@@ -15,7 +15,7 @@ import { AuthService } from '../../services/auth.service';
 export class LoginComponent {
   showPassword = false;
   loginForm: FormGroup;
-  errorMessage: string = '';
+  errorMessage = '';
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -46,7 +46,6 @@ export class LoginComponent {
     this.authService.login(username, password).subscribe({
       next: () => {
         console.log('Login successful');
-        // Navigate inside Angular zone
         this.zone.run(() => this.router.navigate(['/home']));
       },
       error: (err) => {

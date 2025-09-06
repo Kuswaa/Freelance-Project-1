@@ -1,102 +1,118 @@
+# scrape_details.py
+import time
 from flask import Blueprint, request, jsonify
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from app.scraper import get_driver
 
 details_bp = Blueprint("details", __name__)
 
-def init_driver():
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(options=options)
-    return driver
-
-@details_bp.route("/details", methods=["POST"])
-def scrape_details():
-    data = request.get_json()
-    url = data.get("url")
-    if not url:
-        return jsonify({"error": "Missing URL"}), 400
-
-    print("🔹 Fetching details for URL:", url)
-    driver = init_driver()
-    details = {}
-    wait = WebDriverWait(driver, 15)  # wait up to 15 seconds for elements
+def scrape_details(detail_url: str):
+    """Scrape a person's details using Selenium."""
+    driver = get_driver()
+    data = {
+        "name": "N/A",
+        "cedula": "N/A",
+        "image": "/assets/no_user.png",
+        "generales": {},
+        "telefonos": []
+    }
 
     try:
-        driver.get(url)
+        driver.get(detail_url)
+
+        # Wait until the main title is present
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "h5.card-title div"))
+        )
+
+        # DEBUG: first 5000 chars
+        print("📄 DETAILS PAGE SOURCE PREVIEW (first 5000 chars):")
+        print(driver.page_source[:5000])
 
         # --- Name & Cedula ---
-        try:
-            name_el = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h5.card-title div:nth-child(1)")))
-            details["name"] = name_el.text
-        except:
-            details["name"] = "N/A"
-
-        try:
-            cedula_el = driver.find_element(By.CSS_SELECTOR, "h5.card-title div:nth-child(2)")
-            details["cedula"] = cedula_el.text
-        except:
-            details["cedula"] = "N/A"
+        name_parts = driver.find_elements(By.CSS_SELECTOR, "h5.card-title div")
+        if len(name_parts) >= 2:
+            data["name"] = name_parts[0].text.strip()
+            data["cedula"] = name_parts[1].text.strip()
 
         # --- Image ---
         try:
-            foto_el = driver.find_element(By.CSS_SELECTOR, ".foto")
-            bg = foto_el.value_of_css_property("background-image")
-            details["image"] = bg.replace('url("', '').replace('")', '').replace("'", "")
+            foto_div = driver.find_element(By.CSS_SELECTOR, ".foto")
+            style = foto_div.get_attribute("style")  # e.g., background-image: url(...)
+            url = style.split("url(")[-1].split(")")[0].strip('"').strip("'")
+            if url:
+                data["image"] = url
         except:
-            details["image"] = ""
+            pass
 
-        # --- Generales section ---
-        generales = {}
+        # --- Generales ---
         try:
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#generales")))
+            generales = {}
             rows = driver.find_elements(By.CSS_SELECTOR, "#generales .row")
-            print(f"📝 Found {len(rows)} generales rows")
             for row in rows:
                 try:
-                    title = row.find_element(By.CSS_SELECTOR, ".title").text
-                    subtitle = row.find_element(By.CSS_SELECTOR, ".subtitle").text
-                    generales[title] = subtitle
+                    key = row.find_element(By.CSS_SELECTOR, ".title").text.strip()
+                    value = row.find_element(By.CSS_SELECTOR, ".subtitle").text.strip()
+                    generales[key] = value
                 except:
                     continue
-        except:
-            pass
-        details["generales"] = generales
+            data["generales"] = generales
+        except Exception as e:
+            print(f"⚠️ Error extracting generales: {e}")
 
-        # --- Phones section ---
-        phones = []
+        # -----------------------------
+        # Extract telefonos table (handles collapsed accordion)
+        # -----------------------------
         try:
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#telefonos tbody tr")))
-            phone_rows = driver.find_elements(By.CSS_SELECTOR, "#telefonos tbody tr")
-            print(f"📝 Found {len(phone_rows)} phone rows")
-            for tr in phone_rows:
-                try:
-                    cols = tr.find_elements(By.TAG_NAME, "td")
-                    phones.append({
-                        "telefono": cols[0].text if len(cols) > 0 else "",
-                        "tipo": cols[1].text if len(cols) > 1 else "",
-                        "suplidor": cols[2].text if len(cols) > 2 else "",
-                    })
-                except:
-                    continue
-        except:
-            pass
-        details["telefonos"] = phones
+            # Expand the telefonos accordion if it is collapsed
+            try:
+                tel_button = driver.find_element(By.CSS_SELECTOR, "button[data-bs-target='#telefonos']")
+                if "collapsed" in tel_button.get_attribute("class"):
+                    tel_button.click()
+                    time.sleep(0.5)  # wait for the accordion to expand
+            except Exception as e:
+                print(f"⚠️ Could not expand Telefonos accordion: {e}")
 
-        print("✅ Details scraped successfully")
-        return jsonify(details)
+            # Now scrape the telefonos rows
+            telefonos = []
+            phone_rows = driver.find_elements(By.CSS_SELECTOR, "#telefonos tr")
+            for row in phone_rows:
+                cols = row.find_elements(By.TAG_NAME, "td")
+                if cols:
+                    telefonos.append(cols[0].text.strip())
+            data["telefonos"] = telefonos
+        except Exception as e:
+            print(f"⚠️ Error extracting telefonos: {e}")
+            data["telefonos"] = []
 
-    except Exception as e:
-        import traceback
-        print("❌ Error scraping details:", e)
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+    except Exception as main_err:
+        print(f"❌ Error scraping details: {main_err}")
 
     finally:
         driver.quit()
+
+    return data
+
+
+# -----------------------------
+# Flask Route
+# -----------------------------
+@details_bp.route("/details", methods=["POST"])
+def details_route():
+    """API endpoint to fetch details for a person."""
+    try:
+        data = request.json
+        detail_url = data.get("url")
+        if not detail_url:
+            return jsonify({"error": "Missing 'url' in request"}), 400
+
+        print(f"🔎 Fetching details from: {detail_url}")
+        scraped = scrape_details(detail_url)
+        print(f"✅ Parsed details: {scraped}")
+        return jsonify(scraped)
+
+    except Exception as e:
+        print(f"❌ Error in /details route: {e}")
+        return jsonify({"error": "Failed to scrape details"}), 500

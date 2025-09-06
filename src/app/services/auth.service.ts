@@ -1,45 +1,27 @@
 // src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
+import { from, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private _isLoggedIn$ = new BehaviorSubject<boolean>(this.hasToken());
+  constructor(private auth: Auth) {}
 
-  get isLoggedIn$(): Observable<boolean> {
-    return this._isLoggedIn$.asObservable();
+  login(username: string, password: string): Observable<void> {
+    // Transform username into a dummy email for Firebase
+    const email = username.includes('@') ? username : `${username}@dummy.com`;
+    return from(
+      signInWithEmailAndPassword(this.auth, email, password).then(() => {})
+    );
   }
 
-  constructor() {}
-
-  private hasToken(): boolean {
-    return !!sessionStorage.getItem('token');
-  }
-
-  // ✅ Now accepts username + password and returns Observable
-  login(username: string, password: string): Observable<boolean> {
-    if (username && password) {
-      const fakeToken = `${username}-session-token`;
-      sessionStorage.setItem('token', fakeToken);
-      this._isLoggedIn$.next(true);
-      return of(true);
-    } else {
-      return throwError(() => new Error('Invalid credentials'));
-    }
-  }
-
-  logout(): void {
-    sessionStorage.removeItem('token');
-    this._isLoggedIn$.next(false);
+  logout(): Observable<void> {
+    return from(this.auth.signOut());
   }
 
   isAuthenticated(): boolean {
-    return this.hasToken();
-  }
-
-  getToken(): string | null {
-    return sessionStorage.getItem('token');
+    return !!this.auth.currentUser;
   }
 }

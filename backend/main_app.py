@@ -20,12 +20,7 @@ def create_app():
     )
 
     # Allow frontend to call API endpoints
-    CORS(app, resources={
-        r"/scrape/*": {"origins": "*"},
-        r"/search*": {"origins": "*"},
-        r"/details*": {"origins": "*"}  # <-- allow /details endpoint
-
-    })
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
     # Register your API blueprint
     app.register_blueprint(scraper_bp)
@@ -47,4 +42,10 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
+
+    with app.app_context():
+        print("📍 Registered routes:")
+        for rule in app.url_map.iter_rules():
+            print(f"{rule.endpoint:30s} -> {rule}")
+
     app.run(debug=True)
