@@ -12,17 +12,16 @@ print("BASE:", BASE)
 print("Angular dist exists:", os.path.exists(ANGULAR_DIST))
 print("Index.html exists:", os.path.exists(os.path.join(ANGULAR_DIST, "index.html")))
 
-
 def create_app():
     app = Flask(
         __name__,
-        static_folder=None  # <--- disable Flask's automatic static route
+        static_folder=None  # disable Flask's automatic static route
     )
 
     # Allow frontend to call API endpoints
     CORS(app, resources={r"/*": {"origins": "*"}})
 
-    # Register your API blueprint
+    # Register your API blueprints
     app.register_blueprint(scraper_bp)
     app.register_blueprint(details_bp)
 
@@ -39,13 +38,10 @@ def create_app():
 
     return app
 
-
+# Optional: debug route listing
 if __name__ == "__main__":
     app = create_app()
-
     with app.app_context():
         print("📍 Registered routes:")
         for rule in app.url_map.iter_rules():
             print(f"{rule.endpoint:30s} -> {rule}")
-
-    app.run(debug=True)
